@@ -1,0 +1,17 @@
+# آرمینگرام - اجرای ساده بدون HTTPS (فقط برای تست یا پشت nginx خودتان)
+#   docker compose -f docker-compose.simple.yml up -d   ->  http://SERVER_IP:3000
+services:
+  armingram:
+    image: armingram:latest
+    build: .
+    container_name: armingram
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      DATA_DIR: /data
+      COOKIE_SECURE: "false"
+      MAX_UPLOAD_MB: "25"
+    volumes:
+      - ./data:/data
+    ports:
+      - "3000:3000"

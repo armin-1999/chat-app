@@ -1,0 +1,44 @@
+# آرمینگرام - اجرای کامل با HTTPS (Caddy)
+#   cp .env.example .env   # و DOMAIN را تنظیم کنید
+#   docker compose up -d
+services:
+  armingram:
+    image: armingram:latest
+    build: .
+    container_name: armingram
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      DATA_DIR: /data
+      COOKIE_SECURE: "true"
+      TRUST_PROXY: "true"
+      JWT_SECRET: ${JWT_SECRET:-}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+      SESSION_DAYS: ${SESSION_DAYS:-30}
+    volumes:
+      - ./data:/data
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: armingram-caddy
+    restart: unless-stopped
+    depends_on:
+      - armingram
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./deploy/certs:/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
